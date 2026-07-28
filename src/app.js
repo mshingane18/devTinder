@@ -2,26 +2,24 @@ const express = require("express");
 
 const app = express();
 
-app.get("/user", (req, res) => {
-  console.log(req.query);
-  res.send({ firstname: "Mahesh", lastname: "Shingane" });
+const { authAdmin, userAuth } = require("./middleware/auth");
+
+app.use("/admin", authAdmin);
+
+app.post("/user/login", (req, res) => {
+  res.send("Logged in succesfully....");
 });
 
-app.post("/user", (req, res) => {
-  res.send("Added user succesfully!!");
+app.get("/user/getAllUser", userAuth, (req, res) => {
+  res.send("All users list!!....");
 });
 
-app.delete("/user/:id", (req, res) => {
-  console.log(req.params);
-  res.send("Deleted user successfully!!");
+app.get("/admin/getAllData", (req, res) => {
+  res.send("All data!!....");
 });
 
-app.put("/user", (req, res) => {
-  res.send("updated user sucessfully.");
-});
-
-app.get(/^\/ab?c$/, (req, res) => {
-  res.send("Matched");
+app.get("/admin/deleteAllData", (req, res) => {
+  res.send("Deleted all data!!...");
 });
 
 app.listen(3000, () => {
