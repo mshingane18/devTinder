@@ -1,39 +1,25 @@
 const express = require("express");
+const connectDB = require("./config/database");
+const User = require("./models/user");
 
 const app = express();
 
-const { authAdmin, userAuth } = require("./middleware/auth");
+app.use(express.json());
 
-app.use("/admin", authAdmin);
-
-app.post("/user/login", (req, res) => {
-  // throw new Error("anjkcbkasbdc");
-  res.send("Logged in succesfully....");
-});
-
-app.get("/user/getAllUser", userAuth, (req, res) => {
+app.post("/signup", async (req, res) => {
+  console.log(req.body);
   try {
-    throw new Error("anjkcbkasbdc");
-    res.send("All users list!!....");
-  } catch (error) {
-    res.status(500).send("Error!! contact your administraitor!!!!");
+    const user = new User(req.body);
+    await user.save();
+    res.send("Succesfully created the account...");
+  } catch (err) {
+    res.status(400).send("Some error occured.", err.message);
   }
 });
 
-app.get("/admin/getAllData", (req, res) => {
-  res.send("All data!!....");
-});
-
-app.get("/admin/deleteAllData", (req, res) => {
-  res.send("Deleted all data!!...");
-});
-
-app.use("/", (error, req, res, next) => {
-  if (error) {
-    res.status(500).send("something went wrong....");
-  }
-});
-
-app.listen(3000, () => {
-  console.log("server is running on http://localhost:3000");
+connectDB().then(() => {
+  console.log("connection established!!!...");
+  app.listen(3000, () => {
+    console.log("server is running on http://localhost:3000");
+  });
 });
