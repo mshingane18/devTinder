@@ -1,0 +1,200 @@
+{
+  "v": 12,
+  "name": "DevTinder",
+  "folders": [
+    {
+      "v": 12,
+      "name": "user",
+      "folders": [],
+      "requests": [
+        {
+          "v": "17",
+          "name": "/signup",
+          "method": "POST",
+          "endpoint": "http://localhost:3000/signup",
+          "params": [],
+          "headers": [],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": "application/json",
+            "body": "{\n  \"firstName\": \"Mahesh\",\n  \"lastName\": \"Shingane\",\n  \"emailId\": \"maheshs@gmail.com\",\n  \"password\": \"Mahesh@123\",\n  \"gender\": \"male\",\n  \"skills\": [\"spider\", \"man\"],\n  \"age\": 21,\n}\n"
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "/users",
+          "method": "GET",
+          "endpoint": "http://localhost:3000/feed",
+          "params": [],
+          "headers": [],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "/user/id",
+          "method": "DELETE",
+          "endpoint": "http://localhost:3000/user/6a698ec94bb7fb92ec3fdd75",
+          "params": [],
+          "headers": [],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "/user/id",
+          "method": "GET",
+          "endpoint": "http://localhost:3000/userbyid?id=6a699b3537339905a1768550",
+          "params": [],
+          "headers": [],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "/getUserByEmail",
+          "method": "GET",
+          "endpoint": "http://localhost:3000/user?emailId=test@test.com",
+          "params": [],
+          "headers": [],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": "application/json",
+            "body": "{\n   \"emailId\": \"test@test.com\",\n}"
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "/user",
+          "method": "PATCH",
+          "endpoint": "http://localhost:3000/user/6a6b5a9a8dda6221152b3e21",
+          "params": [],
+          "headers": [],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": "application/json",
+            "body": "{  \n  \"about\": \"I am a software developer.\"\n}"
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "/userone",
+          "method": "GET",
+          "endpoint": "http://localhost:3000/userone?emailId=ms@gmail.com",
+          "params": [],
+          "headers": [],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": "application/json",
+            "body": ""
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        },
+        {
+          "v": "17",
+          "name": "/login",
+          "method": "POST",
+          "endpoint": "http://localhost:3000/login",
+          "params": [],
+          "headers": [],
+          "preRequestScript": "",
+          "testScript": "",
+          "auth": {
+            "authType": "inherit",
+            "authActive": true
+          },
+          "body": {
+            "contentType": "application/json",
+            "body": "{\n  \"username\": \"mahesh@gmail.com\",\n  \"password\": \"mahesh@123\"\n}"
+          },
+          "requestVariables": [],
+          "responses": {},
+          "description": null
+        }
+      ],
+      "auth": {
+        "authType": "inherit",
+        "authActive": true
+      },
+      "headers": [],
+      "variables": [],
+      "description": null,
+      "preRequestScript": "",
+      "testScript": ""
+    }
+  ],
+  "requests": [],
+  "auth": {
+    "authType": "none",
+    "authActive": true
+  },
+  "headers": [],
+  "variables": [],
+  "description": "",
+  "preRequestScript": "",
+  "testScript": ""
+}
