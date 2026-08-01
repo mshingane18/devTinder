@@ -1,6 +1,8 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const validateSignUp = require("./utils/validation");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -8,13 +10,47 @@ app.use(express.json());
 
 // add user to the collection
 app.post("/signup", async (req, res) => {
-  console.log(req.body);
   try {
-    const user = new User(req.body);
+    // validate the data first
+    validateSignUp(req);
+
+    const { firstName, lastName, emailId, password } = req.body;
+
+    // encrypt the password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
     await user.save();
     res.send("Succesfully created the account...");
   } catch (err) {
-    res.status(400).send("Some error occured.", err.message);
+    res.status(400).send("Error: " + err.message);
+  }
+});
+
+// user login
+app.post("/login", (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // check if the email is exist in our Db
+    const user = User.findOne({ emailId: username });
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    }
+
+    const isValidUser = bcrypt.compare(password, user.password);
+    if (isValidUser) {
+      res.send("Logged in successfully.");
+    } else {
+      throw new Error("Invalid Credentials");
+    }
+  } catch (err) {
+    throw new Error("Error: " + err.message);
   }
 });
 
@@ -37,7 +73,7 @@ app.get("/userbyid", async (req, res) => {
 
 //findone
 app.get("/userone", async (req, res) => {
-  const userEmail = req.body.emailId;
+  const userEmail = req.query.emailId;
   console.log(userEmail);
   try {
     const user = await User.findOne({ emailId: userEmail });
@@ -53,8 +89,8 @@ app.get("/userone", async (req, res) => {
 
 // get user by emailId
 app.get("/user", async (req, res) => {
-  const userEmail = req.body.emailId;
-  console.log(userEmail);
+  console.log("userEmail:" + req.query.emailId);
+  const userEmail = req.query.emailId;
   try {
     const user = await User.find({ emailId: userEmail });
     if (user.length === 0) {
@@ -63,7 +99,7 @@ app.get("/user", async (req, res) => {
       res.send(user);
     }
   } catch (err) {
-    res.status(502).send("Something went wrong....");
+    res.status(502).send("Something went wrong...." + err.message);
   }
 });
 
@@ -96,15 +132,25 @@ app.delete("/user/:id", async (req, res) => {
 
 //update user by ID
 app.patch("/user/:id", async (req, res) => {
-  const userId = req.params.id;
+  const userId = req.params?.id;
   const data = req.body;
   try {
+    const AllowedUpdates = ["age", "skills", "photoUrl", "about"];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      AllowedUpdates.includes(k),
+    );
+    if (!isUpdateAllowed) throw new Error("updates not allowed");
+    if (data.skills && data.skills.length > 10) {
+      throw new Error("Skills should be less than 10");
+    }
+
     const user = await User.findByIdAndUpdate(userId, data, {
       returnDocument: "after",
+      runValidators: true,
     });
     res.send(user);
   } catch (err) {
-    res.status(502).send("Something went wrong....");
+    res.status(502).send("Error occured." + err.message);
   }
 });
 
