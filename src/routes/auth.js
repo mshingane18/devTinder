@@ -3,6 +3,7 @@ const { userAuth } = require("../middleware/auth");
 const { validateSignUp } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
+const validator = require("validator");
 
 const authRouter = express.Router();
 
@@ -14,6 +15,12 @@ authRouter.post("/signup", async (req, res) => {
 
     const { firstName, lastName, emailId, password } = req.body;
 
+    if (!validator.isStrongPassword(password)) {
+      throw new Error(
+        "Your password is not strong. Password must contain { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false, pointsPerUnique: 1, pointsPerRepeat: 0.5, pointsForContainingLower: 10, pointsForContainingUpper: 10, pointsForContainingNumber: 10, pointsForContainingSymbol: 10 }",
+      );
+    }
+
     // encrypt the password
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -23,19 +30,28 @@ authRouter.post("/signup", async (req, res) => {
       emailId,
       password: passwordHash,
     });
-    await user.save();
-    res.send("Succesfully created the account...");
+    const data = await user.save();
+    const token = await data.getJwtToken();
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 1 * 3600000),
+    });
+    res.status(200).json({
+      message: `${firstName} you account is created successfully. Please provide more details in profile.`,
+      data,
+    });
   } catch (err) {
-    res.status(400).send("Error: " + err.message);
+    res.status(400).json({
+      message: err.message,
+    });
   }
 });
 
 // user login
 authRouter.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { emailId, password } = req.body;
     // check if the email is exist in our Db
-    const user = await User.findOne({ emailId: username });
+    const user = await User.findOne({ emailId: emailId });
     if (!user) {
       throw new Error("Invalid Credentials");
     }
@@ -46,12 +62,17 @@ authRouter.post("/login", async (req, res) => {
       res.cookie("token", token, {
         expires: new Date(Date.now() + 1 * 3600000),
       });
-      res.send("Logged in successfully.");
+      res.json({
+        message: `${user.firstName} you logged in successfully`,
+        data: user,
+      });
     } else {
       throw new Error("Invalid Credentials");
     }
   } catch (err) {
-    throw new Error("Error: " + err.message);
+    res.status(400).json({
+      message: err.message,
+    });
   }
 });
 

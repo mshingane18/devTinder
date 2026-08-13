@@ -41,13 +41,13 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
       .populate("fromUserId", SAFE_USER_DATA)
       .populate("toUserId", SAFE_USER_DATA);
 
-    const response = connections.map((data) => {
-      if (data.fromUserId._id.equals(longgedInUser._id)) {
-        return data.toUserId;
+    const data = connections.map((connection) => {
+      if (connection.fromUserId._id.equals(longgedInUser._id)) {
+        return connection.toUserId;
       }
-      return data.fromUserId;
+      return connection.fromUserId;
     });
-    res.json({ response });
+    res.status(200).json({ message: "Fetched connection successfully", data });
   } catch (err) {
     res.status(400).send("Error: " + err.message);
   }
@@ -81,6 +81,10 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     .skip(skip)
     .limit(limit);
 
-  res.json({ userFeed });
+  res.status(200).json({
+    success: true,
+    message: "Feed fetched successfully",
+    userFeed,
+  });
 });
 module.exports = userRouter;
