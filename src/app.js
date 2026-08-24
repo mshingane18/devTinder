@@ -6,12 +6,16 @@ const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
 
 app.use(
   cors({
-    origin: "https://devtinder-web-mnl6.onrender.com",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? "https://devtinder-web-mnl6.onrender.com"
+        : "http://localhost:5173",
     credentials: true,
   }),
 );
@@ -25,7 +29,7 @@ app.use("/", userRouter);
 
 connectDB().then(() => {
   console.log("connection established!!!...");
-  app.listen(3000, () => {
-    console.log("server is running on http://localhost:3000");
+  app.listen(process.env.PORT, () => {
+    console.log(`server is running on http://localhost:${process.env.PORT}`);
   });
 });
