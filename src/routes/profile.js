@@ -4,6 +4,7 @@ const { validateProfileEditFields } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const validator = require("validator");
+const upload = require("../middleware/upload");
 
 const profileRouter = express.Router();
 
@@ -17,25 +18,36 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
   }
 });
 
-profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
-  try {
-    const isProfileEditAllowed = validateProfileEditFields(req);
-    if (!isProfileEditAllowed) {
-      throw new Error("Trying to edit immutable fields.");
+profileRouter.patch(
+  "/profile/edit",
+  userAuth,
+  upload.single("photo"),
+  async (req, res) => {
+    try {
+      const isProfileEditAllowed = validateProfileEditFields(req);
+      if (!isProfileEditAllowed) {
+        throw new Error("Trying to edit immutable fields.");
+      }
+      const loggedInUser = req.user;
+      // If a new photo was uploaded,
+      // Cloudinary URL will be available in req.file.path
+      console.log("req.file", req.file);
+      if (req.file) {
+        req.body.photoUrl = req.file.path;
+      }
+      Object.keys(req.body).every(
+        (field) => (loggedInUser[field] = req.body[field]),
+      );
+      await loggedInUser.save();
+      res.json({
+        message: `${loggedInUser.firstName}, Your profile updated successfully.`,
+        data: loggedInUser,
+      });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
     }
-    const loggedInUser = req.user;
-    Object.keys(req.body).every(
-      (field) => (loggedInUser[field] = req.body[field]),
-    );
-    await loggedInUser.save();
-    res.json({
-      message: `${loggedInUser.firstName}, Your profile updated successfully.`,
-      data: loggedInUser,
-    });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+  },
+);
 
 profileRouter.patch("/profile/password", async (req, res) => {
   try {
