@@ -29,15 +29,40 @@ profileRouter.patch(
         throw new Error("Trying to edit immutable fields.");
       }
       const loggedInUser = req.user;
+      const updateData = { ...req.body };
+
+      if ("age" in updateData) {
+        if (updateData.age.trim() === "") {
+          delete updateData.age;
+        } else {
+          const parsedAge = Number(updateData.age);
+
+          if (!Number.isInteger(parsedAge) || parsedAge < 18) {
+            throw new Error("Age must be a whole number of at least 18.");
+          }
+
+          updateData.age = parsedAge;
+        }
+      }
+
+      if ("gender" in updateData) {
+        updateData.gender = updateData.gender.trim().toLowerCase();
+
+        if (!["male", "female", "other"].includes(updateData.gender)) {
+          throw new Error("Gender data is not valid");
+        }
+      }
+
+      if (typeof updateData.skills === "string") {
+        updateData.skills = JSON.parse(updateData.skills);
+      }
+
       // If a new photo was uploaded,
       // Cloudinary URL will be available in req.file.path
-      console.log("req.file", req.file);
       if (req.file) {
-        req.body.photoUrl = req.file.path;
+        updateData.photoUrl = req.file.path;
       }
-      Object.keys(req.body).every(
-        (field) => (loggedInUser[field] = req.body[field]),
-      );
+      Object.assign(loggedInUser, updateData);
       await loggedInUser.save();
       res.json({
         message: `${loggedInUser.firstName}, Your profile updated successfully.`,

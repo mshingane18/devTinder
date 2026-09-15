@@ -66,7 +66,8 @@ const userSchema = new mongoose.Schema(
       default: "I am a good person.",
     },
     skills: {
-      type: [],
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true },
