@@ -6,6 +6,13 @@ const User = require("../models/user");
 const validator = require("validator");
 
 const authRouter = express.Router();
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+  maxAge: 1 * 3600000,
+};
 
 // add user to the collection
 authRouter.post("/signup", async (req, res) => {
@@ -32,9 +39,7 @@ authRouter.post("/signup", async (req, res) => {
     });
     const data = await user.save();
     const token = await data.getJwtToken();
-    res.cookie("token", token, {
-      expires: new Date(Date.now() + 1 * 3600000),
-    });
+    res.cookie("token", token, cookieOptions);
     res.status(200).json({
       message: `${firstName} you account is created successfully. Please provide more details in profile.`,
       data,
@@ -61,12 +66,7 @@ authRouter.post("/login", async (req, res) => {
       const token = await user.getJwtToken();
 
       //set cookie with token
-      res.cookie("token", token, {
-        sameSite: "none",
-        secure: true,
-        httpOnly: true,
-        expires: new Date(Date.now() + 1 * 3600000),
-      });
+      res.cookie("token", token, cookieOptions);
       res.json({
         message: `${user.firstName} you logged in successfully`,
         data: user,
@@ -82,7 +82,7 @@ authRouter.post("/login", async (req, res) => {
 });
 
 authRouter.post("/logout", (req, res) => {
-  res.cookie("token", null, { expires: new Date(Date.now()) });
+  res.clearCookie("token", cookieOptions);
   res.send("Logout successfully!!!");
 });
 
