@@ -33,7 +33,7 @@ profileRouter.patch(
 
       if ("age" in updateData) {
         if (updateData.age.trim() === "") {
-          delete updateData.age;
+          updateData.age = null;
         } else {
           const parsedAge = Number(updateData.age);
 
