@@ -6,6 +6,28 @@ const { userAuth } = require("../middleware/auth");
 
 const chatRouter = express.Router();
 
+chatRouter.get("/chat/unread-count", userAuth, async (req, res) => {
+  try {
+    const chats = await Chat.find({ participants: req.user._id }).select(
+      "messages",
+    );
+    const unreadCount = chats.reduce(
+      (total, chat) =>
+        total +
+        chat.messages.filter(
+          (message) =>
+            String(message.receiverId) === String(req.user._id) &&
+            !message.readAt,
+        ).length,
+      0,
+    );
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error("Error fetching unread count:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 chatRouter.get("/chat/:connectionId", userAuth, async (req, res) => {
   const { connectionId } = req.params;
   const userId = req.user?._id;
