@@ -2,6 +2,7 @@ const socketIO = require("socket.io");
 const { allowedOrigins } = require("./constants");
 const crypto = require("crypto");
 const Chat = require("../models/chat");
+const connectionRequest = require("../models/connectionRequest");
 
 const initilizeSocket = (server) => {
   const getSecretRoomId = (userId1, connectionId) => {
@@ -38,6 +39,23 @@ const initilizeSocket = (server) => {
           if (!userId || !connectionId || !trimmedText) return;
           const roomId = getSecretRoomId(userId, connectionId);
 
+          const connections = await connectionRequest.find({
+            $or: [
+              {
+                fromUserId: userId,
+                toUserId: connectionId,
+                status: "accepted",
+              },
+              {
+                fromUserId: connectionId,
+                toUserId: userId,
+                status: "accepted",
+              },
+            ],
+          });
+          if (connections.length === 0) {
+            return;
+          }
           let chat = await Chat.findOne({
             participants: { $all: [userId, connectionId] },
           });
