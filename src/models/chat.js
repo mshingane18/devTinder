@@ -12,6 +12,8 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
     },
     text: { type: String, required: true },
+    deliveredAt: Date,
+    readAt: Date,
   },
   { timestamps: true },
 );
