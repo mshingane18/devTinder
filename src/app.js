@@ -6,16 +6,13 @@ const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
+const chatRouter = require("./routes/chat");
 const cors = require("cors");
+const http = require("http");
+const { allowedOrigins } = require("./utils/constants");
+const initilizeSocket = require("./utils/socket");
 
 const app = express();
-
-const allowedOrigins = [
-  "https://maheshshingane.site",
-  "https://www.maheshshingane.site",
-  "https://devtinder-web-mnl6.onrender.com",
-  "http://localhost:5173",
-];
 
 app.use(
   cors({
@@ -36,10 +33,14 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
+app.use("/", chatRouter);
+
+const server = http.createServer(app);
+initilizeSocket(server);
 
 connectDB().then(() => {
   console.log("connection established!!!...");
-  app.listen(process.env.PORT, () => {
+  server.listen(process.env.PORT, () => {
     console.log(`server is running on http://localhost:${process.env.PORT}`);
   });
 });
