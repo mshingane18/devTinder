@@ -26,6 +26,8 @@ const ConnectionRequestSchema = new mongoose.Schema(
 );
 
 ConnectionRequestSchema.index({ fromUserId: 1, toUserId: 1 });
+ConnectionRequestSchema.index({ fromUserId: 1, status: 1, toUserId: 1 });
+ConnectionRequestSchema.index({ toUserId: 1, status: 1, fromUserId: 1 });
 
 ConnectionRequestSchema.pre("save", function () {
   const connectionRequest = this;
