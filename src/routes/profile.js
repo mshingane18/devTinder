@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const validator = require("validator");
 const upload = require("../middleware/upload");
+const cloudinary = require("../config/cloudinary");
 
 const profileRouter = express.Router();
 
@@ -23,12 +24,16 @@ profileRouter.patch(
   userAuth,
   upload.single("photo"),
   async (req, res) => {
+    let newPhotoPublicId = null;
+    let profileSaved = false;
+
     try {
       const isProfileEditAllowed = validateProfileEditFields(req);
       if (!isProfileEditAllowed) {
         throw new Error("Trying to edit immutable fields.");
       }
       const loggedInUser = req.user;
+      const oldPhotoPublicId = loggedInUser.photoPublicId;
       const updateData = { ...req.body };
 
       if ("age" in updateData) {
@@ -57,18 +62,42 @@ profileRouter.patch(
         updateData.skills = JSON.parse(updateData.skills);
       }
 
-      // If a new photo was uploaded,
-      // Cloudinary URL will be available in req.file.path
       if (req.file) {
+        newPhotoPublicId = req.file.filename;
         updateData.photoUrl = req.file.path;
+        updateData.photoPublicId = newPhotoPublicId;
       }
       Object.assign(loggedInUser, updateData);
       await loggedInUser.save();
+      profileSaved = true;
+
+      if (req.file && oldPhotoPublicId) {
+        try {
+          await cloudinary.uploader.destroy(oldPhotoPublicId);
+          console.log("Old profile image deleted:", oldPhotoPublicId);
+        } catch (cloudinaryError) {
+          console.error(
+            "Failed to delete old profile image:",
+            cloudinaryError.message,
+          );
+        }
+      }
+
       res.json({
         message: `${loggedInUser.firstName}, Your profile updated successfully.`,
         data: loggedInUser,
       });
     } catch (err) {
+      if (newPhotoPublicId && !profileSaved) {
+        try {
+          await cloudinary.uploader.destroy(newPhotoPublicId);
+        } catch (cleanupError) {
+          console.error(
+            "Failed to cleanup newly uploaded image:",
+            cleanupError.message,
+          );
+        }
+      }
       res.status(400).json({ message: err.message });
     }
   },

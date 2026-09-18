@@ -61,6 +61,10 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+    photoPublicId: {
+      type: String,
+      default: null,
+    },
     about: {
       type: String,
       default: "I am a good person.",
