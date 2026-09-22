@@ -9,7 +9,7 @@ const chatRouter = express.Router();
 chatRouter.get("/chat/unread-count", userAuth, async (req, res) => {
   try {
     const chats = await Chat.find({ participants: req.user._id }).select(
-      "messages",
+      "participants messages",
     );
     const unreadCount = chats.reduce(
       (total, chat) =>
@@ -24,6 +24,37 @@ chatRouter.get("/chat/unread-count", userAuth, async (req, res) => {
     res.json({ unreadCount });
   } catch (error) {
     console.error("Error fetching unread count:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+chatRouter.get("/chat/unread-counts", userAuth, async (req, res) => {
+  try {
+    const chats = await Chat.find({ participants: req.user._id }).select(
+      "participants messages",
+    );
+    const unreadCounts = {};
+
+    chats.forEach((chat) => {
+      const otherUserId = chat.participants.find(
+        (participant) => String(participant) !== String(req.user._id),
+      );
+      if (!otherUserId) return;
+
+      const unreadForConnection = chat.messages.filter(
+        (message) =>
+          String(message.receiverId) === String(req.user._id) &&
+          !message.readAt,
+      ).length;
+
+      if (unreadForConnection > 0) {
+        unreadCounts[String(otherUserId)] = unreadForConnection;
+      }
+    });
+
+    res.json({ counts: unreadCounts });
+  } catch (error) {
+    console.error("Error fetching unread counts by connection:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

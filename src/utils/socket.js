@@ -59,6 +59,7 @@ const initilizeSocket = (server) => {
 
   io.on("connection", (socket) => {
     const userId = String(socket.user._id);
+    socket.join(userId);
     const userSockets = onlineUsers.get(userId) ?? new Set();
     userSockets.add(socket.id);
     onlineUsers.set(userId, userSockets);
@@ -160,7 +161,7 @@ const initilizeSocket = (server) => {
           });
           await chat.save();
           const savedMessage = chat.messages[chat.messages.length - 1];
-          io.to(roomId).emit("receiveMessage", {
+          const payload = {
             firstName: socket.user.firstName,
             userId: String(userId),
             text: trimmedText,
@@ -168,7 +169,9 @@ const initilizeSocket = (server) => {
             clientMessageId,
             createdAt: savedMessage.createdAt,
             status: savedMessage.deliveredAt ? "delivered" : "sent",
-          });
+          };
+          io.to(roomId).emit("receiveMessage", payload);
+          io.to(String(connectionId)).emit("receiveMessage", payload);
         } catch (error) {
           console.error("Error sending message:", error);
         }
